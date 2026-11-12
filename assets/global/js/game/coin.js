@@ -57,7 +57,7 @@ function startGame(data) {
   timerA = setInterval(function () {
     successOrError();
     endGame(data);
-  }, 15000);
+  }, 3500);
 }
 
 function gameResult(data) {

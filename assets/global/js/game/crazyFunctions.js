@@ -5,7 +5,7 @@ function startGame(data) {
   timerA = setInterval(function () {
     succOrError();
     endGame(data);
-  }, 10000);
+  }, 5000);
 }
 
 function startSpin(data) {

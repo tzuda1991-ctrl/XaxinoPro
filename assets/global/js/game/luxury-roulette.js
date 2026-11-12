@@ -60,10 +60,10 @@
         var container = this.canvas.parentElement;
         var winW = window.innerWidth;
         // On mobile (< 576px), make wheel compact (270px-285px) so all controls and board fit on screen without excessive scrolling
-        var maxSize = winW < 576 ? Math.min(winW - 24, 280) : (winW < 992 ? 310 : 340);
+        var maxSize = winW < 576 ? Math.min(winW - 32, 225) : (winW < 992 ? 290 : 330);
         var rect = container ? container.getBoundingClientRect() : { width: maxSize, height: maxSize };
         var size = Math.min(rect.width || maxSize, maxSize);
-        if (size < 240) size = 240;
+        if (size < 195) size = 195;
 
         var dpr = window.devicePixelRatio || 1;
         this.canvas.width = size * dpr;

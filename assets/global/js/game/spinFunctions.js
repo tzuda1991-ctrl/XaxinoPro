@@ -4,7 +4,7 @@ function startGame(data) {
   timerA = setInterval(function () {
     successOrError();
     endGame(data);
-  }, 10000);
+  }, 4500);
 }
 
 function startSpin(data) {
@@ -51,7 +51,7 @@ function runningAnimation() {
 function playingAnimation() {
   theWheel.animation.type = "spinToStop";
   theWheel.animation.spins = 50;
-  theWheel.animation.duration = 10;
+  theWheel.animation.duration = 4.5;
 }
 
 function beforeProcess() {

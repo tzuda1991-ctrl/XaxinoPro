@@ -1,78 +1,91 @@
+var timerA = null;
+
 function beforeProcess() {
-    $('.result-card').find('img').attr('src', '');
-    setTimeout(function () {
-    }, 1000);
+    $('.result-card').empty();
+    $('.showAndarCard').empty();
+    $('.showBaharCard').empty();
     $("#playBtn").html('<i class="la la-gear fa-spin"></i> Processing...');
-    $('.showAndarCard').html('');
-    $('.showBaharCard').html('');
     $("#playBtn").attr("disabled", true);
 }
 
 function success(data) {
     setPopup(data);
-    $('.bal').html(data.bal);
-    $('#playBtn').html('Play');
+    if (data.bal !== undefined) {
+        $('.bal, .user-balance, .balance').html(data.bal);
+    }
+    $('#playBtn').html('Play Now');
     $('#playBtn').attr('disabled', false);
-    $('.single-select').removeClass('active');
-    $('.single-select').removeClass('op');
+    $('.single-select').removeClass('active op');
     $('.single-select').find('img').removeClass('op');
     $('img').removeClass('op');
 }
 
 function successOrError() {
     $(".gmimg").removeClass("op");
-    $("#game").find("input").not("input[name=type],input[name=_token]").val("");
-    $("button[type=submit]").html("Play");
-    $("button[type=submit]").removeAttr("disabled");
-    $(".single-select").removeClass("active");
-    $(".single-select").removeClass("op");
+    $("button[type=submit], #playBtn").html("Play Now");
+    $("button[type=submit], #playBtn").removeAttr("disabled");
+    $(".single-select").removeClass("active op");
     $(".single-select").find("img").removeClass("op");
 }
 
 function startGame(data) {
-    $('#playBtn').html('<i class="la la-gear fa-spin"></i> Playing...');
-    $('.result-card').append(`<img src="${imagePath}/${data.randomCard}.png">`);
+    $('#playBtn').html('<i class="la la-gear fa-spin"></i> Dealing Cards...');
+    $('.result-card').html(`<img src="${imagePath}/${data.randomCard}.png" style="width:100%;border-radius:6px;">`);
     $('.ab-card').removeClass('d-none');
 
-    setTimeout(function () {
-        $.each(data.andarCards, function (index, value) {
-            if (value == undefined) {
-                return false;
-            }
-            setTimeout(function () {
-                $('.showAndarCard').append(`<img class="andar-image" src="${imagePath}/${value}.png">`);
-            }, index * 1000);
+    var andarList = data.andarCards || [];
+    var baharList = data.baharCards || [];
+    var stepMs = 450;
 
-            if (data.baharCards[index] == undefined) {
-                return false;
+    setTimeout(function () {
+        $.each(andarList, function (index, value) {
+            if (value !== undefined) {
+                setTimeout(function () {
+                    playAudio(audioAssetPath, "card.mp3");
+                    $('.showAndarCard').append(`<img class="andar-image" src="${imagePath}/${value}.png">`);
+                }, index * stepMs);
             }
-            setTimeout(function () {
-                $('.showBaharCard').append(`<img class="bahar-image" src="${imagePath}/${data.baharCards[index]}.png">`);
-            }, index * 1000 + 500);
+            if (baharList[index] !== undefined) {
+                setTimeout(function () {
+                    playAudio(audioAssetPath, "card.mp3");
+                    $('.showBaharCard').append(`<img class="bahar-image" src="${imagePath}/${baharList[index]}.png">`);
+                }, index * stepMs + (stepMs / 2));
+            }
         });
 
+        var totalTime = Math.max(andarList.length, baharList.length) * stepMs + 500;
         setTimeout(function () {
             endGame(data);
             successOrError();
-        }, data.andarCards.length * 1000 + 1000);
-    }, 1000);
+        }, totalTime);
+    }, 350);
 }
 
-$(".andar").click(function () {
+$(".andar").off("click").on("click", function () {
     $("input[name=choose]").val("andar");
-    $(this).addClass("op");
-    $(".bahar").removeClass("op");
+    $(this).addClass("op active");
+    $(".bahar").removeClass("op active");
     playAudio(audioAssetPath, "click.mp3");
 });
 
-$(".bahar").click(function () {
+$(".bahar").off("click").on("click", function () {
     $("input[name=choose]").val("bahar");
-    $(this).addClass("op");
-    $(".andar").removeClass("op");
+    $(this).addClass("op active");
+    $(".andar").removeClass("op active");
     playAudio(audioAssetPath, "click.mp3");
 });
 
-$('#game').on('submit', function (e) {
+$('#game').off('submit').on('submit', function (e) {
     e.preventDefault();
+    var chosen = $("input[name=choose]").val();
+    var inv = $("input[name=invest]").val();
+    if (!chosen) {
+        notify('error', 'Please select Andar or Bahar first!');
+        return false;
+    }
+    if (!inv || parseFloat(inv) <= 0) {
+        notify('error', 'Please enter or select a chip bet amount!');
+        return false;
+    }
     playGame($(this).serialize(), "card.mp3");
 });

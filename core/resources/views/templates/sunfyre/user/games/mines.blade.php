@@ -91,7 +91,7 @@
         let minLimit = Number("{{ $game->min_limit }}");
         let maxLimit = Number("{{ $game->max_limit }}");
         let currency = "{{ gs('cur_text') }}";
-        let userBalance = Number("{{ auth()->user()->balance }}");
+        let userBalance = Number("{{ ($balance ?? auth()->user()->balance) }}");
         audioAssetPath = `{{ asset('assets/audio') }}`;
 
         $(".minBtn").on('click', function(e) {

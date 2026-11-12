@@ -29,7 +29,7 @@ function sloting(pos1) {
 
     var slotRef = document.getElementById("slot1");
     slotRef.animate(slot, {
-        duration: 10000,
+        duration: 3000,
         fill: "forwards",
         easing: "linear",
         iterationCount: 1,
@@ -57,7 +57,7 @@ function sloting2(pos2) {
 
     var slotRef = document.getElementById("slot2");
     slotRef.animate(slot, {
-        duration: 12000,
+        duration: 3500,
         fill: "forwards",
         easing: "linear",
         iterationCount: 1,

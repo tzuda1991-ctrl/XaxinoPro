@@ -3,7 +3,7 @@
     <div class="row gy-5 gx-lg-5 align-items-center">
         <div class="col-xl-6 col-lg-7">
             <div class="headtail-body">
-                @include('Template::partials.game_shape')
+                
                 <div class="headtail-body__flip middle-el">
                     <div class="cd-ft"></div>
                     <div class="game-details-left">

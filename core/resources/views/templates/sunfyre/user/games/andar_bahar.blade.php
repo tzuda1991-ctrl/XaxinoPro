@@ -3,9 +3,7 @@
     <div class="row gy-5 gx-lg-5 align-items-center">
         <div class="col-lg-6">
             <div class="headtail-body style-two overflow-hidden">
-                <div class="headtail-body__shape">
-                    @include('Template::partials.game_shape')
-                </div>
+                
                 <div class="headtail-body__flip">
                     <div class="game-details-left">
                         <div class="ab-card-wrapper">

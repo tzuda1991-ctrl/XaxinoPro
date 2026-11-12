@@ -71,8 +71,17 @@ class AppServiceProvider extends ServiceProvider {
             ]);
         });
 
-        if (gs('force_ssl')) {
+        $host = request()->getHost();
+        if (
+            gs('force_ssl') ||
+            request()->isSecure() ||
+            request()->header('x-forwarded-proto') === 'https' ||
+            request()->header('x-forwarded-ssl') === 'on' ||
+            str_starts_with((string) config('app.url'), 'https') ||
+            (!in_array($host, ['localhost', '127.0.0.1', '']) && $host !== null)
+        ) {
             \URL::forceScheme('https');
+            $this->app['request']->server->set('HTTPS', 'on');
         }
 
         Paginator::useBootstrapFive();

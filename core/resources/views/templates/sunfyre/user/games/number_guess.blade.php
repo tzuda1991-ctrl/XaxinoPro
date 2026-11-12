@@ -6,7 +6,7 @@
     <div class="row gy-5 gx-lg-5 align-items-center">
         <div class="col-lg-6">
             <div class="headtail-body">
-                @include('Template::partials.game_shape')
+                
                 <div class="headtail-body__flip">
                     <div class="game-details-left number--guess">
                         <div class="game-details-left__body d-flex align-items-center">

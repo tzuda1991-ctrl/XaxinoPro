@@ -3,7 +3,7 @@
     <div class="row gy-5">
         <div class="col-lg-6">
             <div class="headtail-body">
-                @include('Template::partials.game_shape')
+                
                 <div class="headtail-body__flip">
                     <div class="coin-flipbox">
                         <div class="flp">

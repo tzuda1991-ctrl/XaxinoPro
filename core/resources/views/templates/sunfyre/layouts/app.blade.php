@@ -212,6 +212,47 @@
             registerSW();
         });
     </script>
+
+    <script>
+        (function() {
+            function upgradeUrl(u) {
+                if (!u || typeof u !== 'string') return u;
+                if (window.location.protocol === 'https:' && u.indexOf('http://') === 0) {
+                    return 'https://' + u.substring(7);
+                }
+                return u;
+            }
+            if (window.jQuery) {
+                $.ajaxPrefilter(function(options, originalOptions, jqXHR) {
+                    if (options.url) {
+                        options.url = upgradeUrl(options.url);
+                    }
+                    var token = $('meta[name="csrf-token"]').attr('content');
+                    if (token && (!options.headers || !options.headers['X-CSRF-TOKEN'])) {
+                        jqXHR.setRequestHeader('X-CSRF-TOKEN', token);
+                    }
+                });
+            }
+            function fixForms() {
+                if (window.location.protocol === 'https:') {
+                    document.querySelectorAll('form[action^="http://"]').forEach(function(form) {
+                        form.setAttribute('action', upgradeUrl(form.getAttribute('action')));
+                    });
+                }
+            }
+            document.addEventListener('DOMContentLoaded', fixForms);
+            window.addEventListener('load', fixForms);
+            document.addEventListener('submit', function(e) {
+                if (e.target && e.target.tagName === 'FORM') {
+                    var act = e.target.getAttribute('action');
+                    if (act && act.indexOf('http://') === 0 && window.location.protocol === 'https:') {
+                        e.target.setAttribute('action', upgradeUrl(act));
+                    }
+                }
+            }, true);
+        })();
+    </script>
+
 </body>
 
 </html>

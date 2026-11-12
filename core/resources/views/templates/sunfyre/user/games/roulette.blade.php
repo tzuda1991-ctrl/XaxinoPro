@@ -754,7 +754,7 @@
             .game-wrapper > div:nth-child(1) { order: 1 !important; }
             .game-wrapper > div:nth-child(2) { order: 2 !important; }
             .game-wrapper > div:nth-child(3) { order: 3 !important; }
-            .game-wrapper > div:nth-child(4) { order: 4 !important; }
+            .game-wrapper > div:nth-child(4) { order: 2 !important; }
 
             /* Canvas wheel container */
             .plate {
@@ -832,16 +832,16 @@
             align-items: center;
         }
             .roulette-wrapper table tr td {
-                height: 29px !important;
-                max-height: 29px !important;
-                line-height: 29px !important;
+                height: 25px !important;
+                max-height: 25px !important;
+                line-height: 25px !important;
             }
             .roulette-wrapper table .number-item {
-                font-size: 10px !important;
-                line-height: 29px !important;
+                font-size: 9.5px !important;
+                line-height: 25px !important;
             }
             .roulette-wrapper table .zero .number-item {
-                line-height: 89px !important;
+                line-height: 77px !important;
             }
             .roulette-wrapper table .btn-color {
                 font-size: 8px !important;

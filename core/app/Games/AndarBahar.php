@@ -36,6 +36,7 @@ class AndarBahar extends Game
             : $this->game->probable_win;
 
         $random = mt_rand(0, 100);
+
         if ($random <= $probableWin) {
             $winLossData['win_status'] = Status::WIN;
             $winLossData['result'] = $this->request->choose;
@@ -46,69 +47,63 @@ class AndarBahar extends Game
         return $winLossData;
     }
 
-    protected function sendTempResultCard($card, $deck, $randomCard)
+    protected function getCardRank($card)
     {
-        if ($card[0] != $randomCard[0]) {
-            return $card;
+        if (!$card || !is_string($card)) {
+            return '';
         }
-        return $this->sendTempResultCard(array_pop($deck), $deck, $randomCard);
+        $parts = explode('-', $card);
+        return $parts[0] ?? '';
     }
 
     protected function gameResult()
     {
         $deck = $this->deck();
         shuffle($deck);
+
         $randomCard = array_pop($deck);
+        $jokerRank = $this->getCardRank($randomCard);
+
+        $matchingCards = [];
+        $nonMatchingCards = [];
+
+        foreach ($deck as $c) {
+            if ($this->getCardRank($c) === $jokerRank) {
+                $matchingCards[] = $c;
+            } else {
+                $nonMatchingCards[] = $c;
+            }
+        }
+
+        shuffle($matchingCards);
+        shuffle($nonMatchingCards);
+
+        $winLossData = $this->winLoss();
+        $winningSide = $winLossData['result']; // 'andar' or 'bahar'
 
         $andarCards = [];
         $baharCards = [];
 
-        $turn = 'andar';
-        $winLossData = $this->winLoss();
-        $maxIterations = 50;
-        $iteration = 0;
-        while (!empty($deck) && $iteration < $maxIterations) {
-            $iteration++;
-            $drawnCard = array_pop($deck);
-            if ($turn === 'andar') {
-                $andarCards[] = $drawnCard;
-                if ($drawnCard[0] == $randomCard[0]) {
-                    if ($winLossData['win_status'] == Status::WIN && $this->request->choose == 'andar') {
-                        break;
-                    } else {
-                        if ($this->request->choose == 'bahar' && $winLossData['win_status'] == Status::LOSS) {
-                            break;
-                        } else {
-                            $tempResultCard = array_pop($andarCards);
-                            $newCard = $this->sendTempResultCard(array_pop($deck), $deck, $randomCard);
-                            if ($newCard !== null) {
-                                $andarCards[] = $newCard;
-                                $deck[] = $tempResultCard;
-                            }
-                        }
-                    }
-                }
-                $turn = 'bahar';
-            } else {
-                $baharCards[] = $drawnCard;
-                if ($drawnCard[0] == $randomCard[0]) {
-                    if ($winLossData['win_status'] == Status::WIN && $this->request->choose == 'bahar') {
-                        break;
-                    } else {
-                        if ($this->request->choose == 'andar' && $winLossData['win_status'] == Status::LOSS) {
-                            break;
-                        } else {
-                            $tempResultCard = array_pop($baharCards);
-                            $newCard = $this->sendTempResultCard(array_pop($deck), $deck, $randomCard);
-                            if ($newCard !== null) {
-                                $baharCards[] = $newCard;
-                                $deck[] = $tempResultCard;
-                            }
-                        }
-                    }
-                }
-                $turn = 'andar';
+        // Deal 2 to 4 non-matching pairs first for exciting, fast gameplay
+        $pairsCount = mt_rand(2, 4);
+        for ($i = 0; $i < $pairsCount; $i++) {
+            if (!empty($nonMatchingCards)) {
+                $andarCards[] = array_pop($nonMatchingCards);
             }
+            if (!empty($nonMatchingCards)) {
+                $baharCards[] = array_pop($nonMatchingCards);
+            }
+        }
+
+        $finalMatchingCard = !empty($matchingCards) ? array_pop($matchingCards) : $randomCard;
+
+        if ($winningSide === 'andar') {
+            $andarCards[] = $finalMatchingCard;
+        } else {
+            if (!empty($nonMatchingCards)) {
+                $andarCards[] = array_pop($nonMatchingCards);
+            }
+            $baharCards[] = $finalMatchingCard;
         }
 
         $this->extraResponseOnStart = array_merge($this->extraResponseOnStart, [
@@ -116,6 +111,7 @@ class AndarBahar extends Game
             'andarCards' => $andarCards,
             'baharCards' => $baharCards
         ]);
+
         return $winLossData;
     }
 }

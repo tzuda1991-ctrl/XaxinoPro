@@ -191,39 +191,60 @@ class ManageUsersController extends Controller {
 
     public function addSubBalance(Request $request, $id) {
         $request->validate([
-            'amount' => 'required|numeric|gt:0',
-            'act'    => 'required|in:add,sub',
-            'remark' => 'required|string|max:255',
+            'amount'      => 'required|numeric|gt:0',
+            'act'         => 'nullable|in:add,sub',
+            'remark'      => 'nullable|string|max:255',
+            'wallet_type' => 'nullable|in:real,demo,both',
         ]);
 
-        $user   = User::findOrFail($id);
-        $amount = $request->amount;
-        $trx    = getTrx();
+        $user       = User::findOrFail($id);
+        $amount     = (float) $request->amount;
+        $act        = $request->act ?: 'add';
+        $remark     = $request->remark ?: 'Admin Balance Update';
+        $walletType = $request->wallet_type ?: 'real';
+        $trx        = getTrx();
+
+        if ($walletType === 'demo') {
+            if ($act == 'add') {
+                $user->demo_balance += $amount;
+                $notify[] = ['success', 'Demo balance added successfully (' . showAmount($amount) . ')'];
+            } else {
+                $user->demo_balance = max(0, $user->demo_balance - $amount);
+                $notify[] = ['success', 'Demo balance subtracted successfully (' . showAmount($amount) . ')'];
+            }
+            $user->save();
+            return back()->withNotify($notify);
+        }
 
         $transaction = new Transaction();
 
-        if ($request->act == 'add') {
+        if ($act == 'add') {
             $user->balance += $amount;
+            if ($walletType === 'both') {
+                $user->demo_balance += $amount;
+            }
 
             $transaction->trx_type = '+';
             $transaction->remark   = 'balance_add';
 
             $notifyTemplate = 'BAL_ADD';
-
-            $notify[] = ['success', 'Balance added successfully'];
+            $notify[] = ['success', 'Balance of ' . showAmount($amount) . ' added successfully to @' . $user->username . ' (New Balance: ' . showAmount($user->balance) . ')'];
         } else {
             if ($amount > $user->balance) {
-                $notify[] = ['error', $user->username . ' doesn\'t have sufficient balance.'];
+                $notify[] = ['error', $user->username . ' doesn't have sufficient balance.'];
                 return back()->withNotify($notify);
             }
 
             $user->balance -= $amount;
+            if ($walletType === 'both') {
+                $user->demo_balance = max(0, $user->demo_balance - $amount);
+            }
 
             $transaction->trx_type = '-';
             $transaction->remark   = 'balance_subtract';
 
             $notifyTemplate = 'BAL_SUB';
-            $notify[]       = ['success', 'Balance subtracted successfully'];
+            $notify[]       = ['success', 'Balance of ' . showAmount($amount) . ' subtracted successfully from @' . $user->username . ' (New Balance: ' . showAmount($user->balance) . ')'];
         }
 
         $user->save();
@@ -233,15 +254,19 @@ class ManageUsersController extends Controller {
         $transaction->post_balance = $user->balance;
         $transaction->charge       = 0;
         $transaction->trx          = $trx;
-        $transaction->details      = $request->remark;
+        $transaction->details      = $remark;
         $transaction->save();
 
-        notify($user, $notifyTemplate, [
-            'trx'          => $trx,
-            'amount'       => showAmount($amount, currencyFormat: false),
-            'remark'       => $request->remark,
-            'post_balance' => showAmount($user->balance, currencyFormat: false),
-        ]);
+        try {
+            notify($user, $notifyTemplate, [
+                'trx'          => $trx,
+                'amount'       => showAmount($amount, currencyFormat: false),
+                'remark'       => $remark,
+                'post_balance' => showAmount($user->balance, currencyFormat: false),
+            ]);
+        } catch (\Throwable $e) {
+            // Ignore notification transport errors so balance update always succeeds
+        }
 
         return back()->withNotify($notify);
     }

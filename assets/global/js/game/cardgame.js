@@ -46,7 +46,7 @@ function animationCard(data) {
         $('.resImg').find('img').attr('src', img)
         $('#cards').addClass('op');
         $('.res').removeClass('d-none');
-    }, 10110);
+    }, 3500);
 }
 
 function successOrError() {
@@ -65,7 +65,7 @@ function startGame(data) {
     timerA = setInterval(function () {
         successOrError();
         endGame(data);
-    }, 10110);
+    }, 3500);
     $('#playBtn').html('<i class="la la-gear fa-spin"></i> Playing...');
 }
 

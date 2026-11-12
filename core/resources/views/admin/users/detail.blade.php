@@ -105,7 +105,7 @@
                     <h5 class="card-title mb-0">@lang('Information of') {{ $user->fullname }}</h5>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('admin.users.update', [$user->id]) }}" method="POST"
+                    <form action="{{ route('admin.users.update', [$user->id], false) }}" method="POST"
                           enctype="multipart/form-data">
                         @csrf
 
@@ -233,24 +233,39 @@
                         <i class="las la-times"></i>
                     </button>
                 </div>
-                <form action="{{ route('admin.users.add.sub.balance', $user->id) }}" class="balanceAddSub disableSubmission" method="POST">
+                                <form action="{{ route('admin.users.add.sub.balance', $user->id, false) }}" class="balanceAddSub" method="POST">
                     @csrf
-                    <input type="hidden" name="act">
+                    <input type="hidden" name="act" value="add">
                     <div class="modal-body">
+                        <div class="form-group">
+                            <label>@lang('Select Wallet')</label>
+                            <select name="wallet_type" class="form-control">
+                                <option value="real" selected>@lang('Real Balance (Main Wallet)') - Current: {{ showAmount($user->balance) }}</option>
+                                <option value="both">@lang('Both Real & Demo Balance')</option>
+                                <option value="demo">@lang('Demo Balance Only') - Current: {{ showAmount($user->demo_balance) }}</option>
+                            </select>
+                        </div>
                         <div class="form-group">
                             <label>@lang('Amount')</label>
                             <div class="input-group">
-                                <input type="number" step="any" name="amount" class="form-control" placeholder="@lang('Please provide positive amount')" required>
+                                <input type="number" step="any" name="amount" id="adminBalAmount" class="form-control" placeholder="@lang('Enter amount (e.g. 10000)')" required>
                                 <div class="input-group-text">{{ __(gs('cur_text')) }}</div>
+                            </div>
+                            <div class="d-flex flex-wrap gap-2 mt-2">
+                                <button type="button" class="btn btn-sm btn-outline--primary quick-admin-amt" data-amt="500">+500</button>
+                                <button type="button" class="btn btn-sm btn-outline--primary quick-admin-amt" data-amt="1000">+1,000</button>
+                                <button type="button" class="btn btn-sm btn-outline--primary quick-admin-amt" data-amt="5000">+5,000</button>
+                                <button type="button" class="btn btn-sm btn-outline--primary quick-admin-amt" data-amt="10000">+10,000</button>
+                                <button type="button" class="btn btn-sm btn-outline--primary quick-admin-amt" data-amt="50000">+50,000</button>
                             </div>
                         </div>
                         <div class="form-group">
                             <label>@lang('Remark')</label>
-                            <textarea class="form-control" placeholder="@lang('Remark')" name="remark" rows="4" required></textarea>
+                            <textarea class="form-control" placeholder="@lang('Remark')" name="remark" rows="2">Balance updated by Admin</textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn--primary h-45 w-100">@lang('Submit')</button>
+                        <button type="submit" class="btn btn--primary h-45 w-100">@lang('Submit Balance Update')</button>
                     </div>
                 </form>
             </div>
@@ -273,7 +288,7 @@
                         <i class="las la-times"></i>
                     </button>
                 </div>
-                <form action="{{ route('admin.users.status', $user->id) }}" method="POST">
+                <form action="{{ route('admin.users.status', $user->id, false) }}" method="POST">
                     @csrf
                     <div class="modal-body">
                         @if ($user->status == Status::USER_ACTIVE)

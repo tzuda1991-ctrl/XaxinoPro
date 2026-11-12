@@ -937,7 +937,7 @@ function startGame(data) {
   timerA = setInterval(function () {
     succOrError();
     endGame(data);
-  }, 10000);
+  }, 5000);
 }
 
 function succOrError() {
@@ -1095,7 +1095,7 @@ function game(data) {
           $('#reSpinBtn').removeClass('d-none');
           $('[name="invest"').attr('disabled', true);
           $(".bal").text(data.balance);
-        }, 10000);
+        }, 5000);
       } else {
         $(".bal").text(data.balance);
         startGame(data);
@@ -1147,7 +1147,7 @@ $('#reSpinBtn').on('click', function (e) {
           $('#playBtn').addClass('d-none');
           $('#reSpinBtn').removeClass('d-none');
           $('[name="invest"]').attr('disabled', true);
-        }, 10000);
+        }, 5000);
       } else {
         startSpin(data);
         $("#playBtn").html('<i class="la la-gear fa-spin"></i> Playing...');
@@ -1156,7 +1156,7 @@ $('#reSpinBtn').on('click', function (e) {
           succOrError();
           gameFinish(data, timerA);
           $('[name="invest"').attr('disabled', false);
-        }, 10000);
+        }, 5000);
         isRequest = false;
       }
     },
