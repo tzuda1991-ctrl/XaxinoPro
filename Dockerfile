@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && docker-php-ext-install pdo_mysql mysqli mbstring exif pcntl bcmath gd zip intl soap
 
 # Enable Apache modules: rewrite, headers, env & ensure ONLY mpm_prefork is loaded
+RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 RUN a2enmod rewrite headers env \
     && rm -f /etc/apache2/mods-enabled/mpm_event.* /etc/apache2/mods-enabled/mpm_worker.* \
     && a2dismod mpm_event mpm_worker || true \
