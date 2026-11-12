@@ -27,7 +27,14 @@ RUN echo 'memory_limit = 512M' > /usr/local/etc/php/conf.d/xaxino-limits.ini \
 WORKDIR /var/www/html
 COPY . /var/www/html
 
-RUN chown -R www-data:www-data /var/www/html \
+# Create storage and cache directories before chown/chmod
+RUN mkdir -p /var/www/html/core/storage/app/public \
+             /var/www/html/core/storage/framework/cache/data \
+             /var/www/html/core/storage/framework/sessions \
+             /var/www/html/core/storage/framework/views \
+             /var/www/html/core/storage/logs \
+             /var/www/html/core/bootstrap/cache \
+    && chown -R www-data:www-data /var/www/html \
     && chmod -R 775 /var/www/html/core/storage \
     && chmod -R 775 /var/www/html/core/bootstrap/cache \
     && chmod +x /var/www/html/start.sh

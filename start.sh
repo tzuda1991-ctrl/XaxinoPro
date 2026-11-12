@@ -8,6 +8,14 @@ sed -i "s/80/$PORT/g" /etc/apache2/sites-available/000-default.conf /etc/apache2
 
 ENV_FILE="/var/www/html/core/.env"
 
+# Ensure storage directories exist at runtime
+mkdir -p /var/www/html/core/storage/app/public \
+         /var/www/html/core/storage/framework/cache/data \
+         /var/www/html/core/storage/framework/sessions \
+         /var/www/html/core/storage/framework/views \
+         /var/www/html/core/storage/logs \
+         /var/www/html/core/bootstrap/cache
+
 # Copy default .env if not exists
 if [ ! -f "$ENV_FILE" ]; then
   cp /var/www/html/core/.env.example "$ENV_FILE" 2>/dev/null || touch "$ENV_FILE"
