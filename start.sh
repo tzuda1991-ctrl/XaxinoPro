@@ -34,5 +34,10 @@ php /var/www/html/core/artisan optimize:clear || true
 chown -R www-data:www-data /var/www/html/core/storage /var/www/html/core/bootstrap/cache
 chmod -R 775 /var/www/html/core/storage /var/www/html/core/bootstrap/cache
 
+# Fix Apache multi-MPM conflict: ensure ONLY mpm_prefork is loaded
+rm -f /etc/apache2/mods-enabled/mpm_event.* /etc/apache2/mods-enabled/mpm_worker.*
+a2dismod mpm_event mpm_worker 2>/dev/null || true
+a2enmod mpm_prefork 2>/dev/null || true
+
 echo "=== Launching Apache on port $PORT ==="
 exec apache2-foreground

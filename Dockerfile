@@ -1,13 +1,16 @@
 FROM php:8.3-apache
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     libpng-dev libjpeg-dev libfreetype6-dev libzip-dev \
     libicu-dev libonig-dev libxml2-dev zip unzip curl default-mysql-client \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install pdo_mysql mysqli mbstring exif pcntl bcmath gd zip intl soap
 
-# Enable Apache modules: rewrite, headers, env
-RUN a2enmod rewrite headers env
+# Enable Apache modules: rewrite, headers, env & ensure ONLY mpm_prefork is loaded
+RUN a2enmod rewrite headers env \
+    && rm -f /etc/apache2/mods-enabled/mpm_event.* /etc/apache2/mods-enabled/mpm_worker.* \
+    && a2dismod mpm_event mpm_worker || true \
+    && a2enmod mpm_prefork
 
 # Apache VirtualHost & Directory Configuration for Laravel
 RUN echo '<Directory /var/www/html>' > /etc/apache2/conf-available/xaxino.conf \
