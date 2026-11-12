@@ -60,7 +60,6 @@ $vars = [
 
 $content = file_exists($envPath) ? file_get_contents($envPath) : '';
 foreach ($vars as $k => $v) {
-    // Escape quotes inside value
     $escaped = str_replace('"', '\"', $v);
     if (preg_match("/^#?\s*{$k}=.*/m", $content)) {
         $content = preg_replace("/^#?\s*{$k}=.*/m", "{$k}=\"{$escaped}\"", $content);
@@ -70,7 +69,7 @@ foreach ($vars as $k => $v) {
 }
 file_put_contents($envPath, $content);
 
-// Now test MySQL and auto-import if available
+// Test MySQL connection and auto-import
 if ($host !== '127.0.0.1' && $host !== 'localhost') {
     echo "Connecting to MySQL at $host:$port...\n";
     $connected = false;
@@ -79,8 +78,9 @@ if ($host !== '127.0.0.1' && $host !== 'localhost') {
         try {
             $pdo = new PDO("mysql:host=$host;port=$port;dbname=$db;charset=utf8mb4", $user, $pass, [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_TIMEOUT => 3,
+                PDO::ATTR_TIMEOUT => 4,
                 PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
+                PDO::MYSQL_ATTR_MULTI_STATEMENTS => true,
             ]);
             echo "✅ Connected to MySQL successfully!\n";
             $connected = true;
@@ -97,21 +97,102 @@ if ($host !== '127.0.0.1' && $host !== 'localhost') {
             $tables = $stmt->fetchAll(PDO::FETCH_COLUMN);
             $count = count($tables);
             echo "Database tables found: $count\n";
-            if ($count === 0 && file_exists('/var/www/html/database.sql')) {
-                echo "Empty database detected. Importing database.sql...\n";
-                $cmd = sprintf(
-                    'mysql --protocol=tcp -h %s -P %s -u %s -p%s %s < /var/www/html/database.sql 2>&1',
-                    escapeshellarg($host),
-                    escapeshellarg($port),
-                    escapeshellarg($user),
-                    escapeshellarg($pass),
-                    escapeshellarg($db)
-                );
-                exec($cmd, $out, $ret);
-                if ($ret === 0) {
-                    echo "✅ database.sql imported successfully!\n";
-                } else {
-                    echo "⚠️ Import notices/warnings: " . implode(" ", $out) . "\n";
+
+            $sqlPath = '/var/www/html/database.sql';
+            if ($count === 0 && file_exists($sqlPath)) {
+                echo "Empty database detected. Starting import of database.sql...\n";
+                $imported = false;
+
+                // Attempt 1: Direct multi-statement PDO execution
+                try {
+                    echo "Attempting import via PDO multi-statements...\n";
+                    $sql = file_get_contents($sqlPath);
+                    $pdo->exec($sql);
+                    $chk = $pdo->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
+                    if (count($chk) > 0) {
+                        echo "✅ Successfully imported " . count($chk) . " tables via PDO!\n";
+                        $imported = true;
+                    }
+                } catch (Exception $pdoErr) {
+                    echo "PDO multi-statement notice: " . $pdoErr->getMessage() . "\n";
+                }
+
+                // Attempt 2: CLI with --skip-ssl
+                if (!$imported) {
+                    echo "Attempting import via mysql CLI (--skip-ssl)...\n";
+                    $cmd = sprintf(
+                        'mysql --protocol=tcp --skip-ssl -h %s -P %s -u %s -p%s %s < %s 2>&1',
+                        escapeshellarg($host),
+                        escapeshellarg($port),
+                        escapeshellarg($user),
+                        escapeshellarg($pass),
+                        escapeshellarg($db),
+                        escapeshellarg($sqlPath)
+                    );
+                    exec($cmd, $out, $ret);
+                    $chk = $pdo->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
+                    if (count($chk) > 0) {
+                        echo "✅ Successfully imported " . count($chk) . " tables via mysql CLI (--skip-ssl)!\n";
+                        $imported = true;
+                    } else {
+                        echo "mysql CLI (--skip-ssl) output: " . implode(" ", $out) . "\n";
+                    }
+                }
+
+                // Attempt 3: CLI with --ssl-verify-server-cert=0
+                if (!$imported) {
+                    echo "Attempting import via mysql CLI (--ssl-verify-server-cert=0)...\n";
+                    $cmd = sprintf(
+                        'mysql --protocol=tcp --ssl-verify-server-cert=0 -h %s -P %s -u %s -p%s %s < %s 2>&1',
+                        escapeshellarg($host),
+                        escapeshellarg($port),
+                        escapeshellarg($user),
+                        escapeshellarg($pass),
+                        escapeshellarg($db),
+                        escapeshellarg($sqlPath)
+                    );
+                    exec($cmd, $out2, $ret2);
+                    $chk = $pdo->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
+                    if (count($chk) > 0) {
+                        echo "✅ Successfully imported " . count($chk) . " tables via mysql CLI (--ssl-verify-server-cert=0)!\n";
+                        $imported = true;
+                    } else {
+                        echo "mysql CLI output: " . implode(" ", $out2) . "\n";
+                    }
+                }
+
+                // Attempt 4: Statement-by-statement PDO execution
+                if (!$imported) {
+                    echo "Attempting statement-by-statement PDO import...\n";
+                    try {
+                        $lines = file($sqlPath);
+                        $query = '';
+                        foreach ($lines as $line) {
+                            $trimmed = trim($line);
+                            if (empty($trimmed) || str_starts_with($trimmed, '--') || str_starts_with($trimmed, '/*')) {
+                                continue;
+                            }
+                            $query .= $line;
+                            if (str_ends_with($trimmed, ';')) {
+                                $pdo->exec($query);
+                                $query = '';
+                            }
+                        }
+                        if (!empty(trim($query))) {
+                            $pdo->exec($query);
+                        }
+                        $chk = $pdo->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
+                        echo "✅ Statement-by-statement imported " . count($chk) . " tables!\n";
+                    } catch (Exception $stmtErr) {
+                        echo "Statement execution error: " . $stmtErr->getMessage() . "\n";
+                    }
+                }
+
+                // Secure cleanup after successful import
+                $finalCount = count($pdo->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN));
+                if ($finalCount > 0) {
+                    echo "Verified $finalCount tables in database. Removing database.sql for security.\n";
+                    @unlink($sqlPath);
                 }
             }
         } catch (Exception $e) {

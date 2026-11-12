@@ -14,7 +14,7 @@ mkdir -p /var/www/html/core/storage/app/public \
          /var/www/html/core/storage/logs \
          /var/www/html/core/bootstrap/cache
 
-# Run PHP environment and database bootstrap
+# Run PHP environment and database bootstrap (handles DB connection & auto-import)
 if [ -f /var/www/html/init_env.php ]; then
   php /var/www/html/init_env.php
 fi
@@ -27,10 +27,7 @@ if ! grep -q "^APP_KEY=base64:" "$ENV_FILE"; then
   php /var/www/html/core/artisan key:generate --force
 fi
 
-# Clean up database.sql for security (prevent public download)
-rm -f /var/www/html/database.sql
-
-# Optimize/cache clear
+# Clear optimization cache
 php /var/www/html/core/artisan optimize:clear || true
 
 # Storage permissions
