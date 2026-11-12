@@ -21,8 +21,8 @@ $spin.on("click", function () {
         color = null;
     $inner
         .attr("data-spinto", randomNumber)
-        .find("li:nth-child(" + randomNumber + ") input")
-        .prop("checked", "checked");
+        ;
+    $inner.find('input[value="' + randomNumber + '"]').prop("checked", true);
     $(this).hide();
     $reset.addClass("disabled").prop("disabled", "disabled").show();
 

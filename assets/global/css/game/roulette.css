@@ -247,20 +247,23 @@ button:focus {
     color: #fff;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 991px) {
     .roulette-wrapper {
-        height: 830px !important;
-        position: relative;
+        height: auto !important;
+        position: relative !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        -webkit-overflow-scrolling: touch !important;
+        padding: 10px 4px !important;
     }
-}
-
-@media (max-width: 767px) {
     .roulette-wrapper table {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        -webkit-transform: translate(-50%, -50%) rotate(90deg);
-        -ms-transform: translate(-50%, -50%) rotate(90deg);
-        transform: translate(-50%, -50%) rotate(90deg);
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        transform: none !important;
+        -webkit-transform: none !important;
+        -ms-transform: none !important;
+        min-width: 600px !important;
+        margin: 0 auto !important;
     }
 }

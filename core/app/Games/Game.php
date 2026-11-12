@@ -244,7 +244,26 @@ abstract class Game {
         if ($this->request->invest > $balance) {
             return ['error' => 'Oops! You have no sufficient balance'];
         }
-        $running = GameLog::where('status', 0)->where('user_id', @$this->user->id)->where('game_id', $this->game->id)->first();
+        // Auto-complete any stale stuck game logs older than 20 seconds so user is never locked out
+        $staleLogs = GameLog::where('status', 0)
+            ->where('user_id', @$this->user->id)
+            ->where('game_id', $this->game->id)
+            ->where('created_at', '<', now()->subSeconds(20))
+            ->get();
+        foreach ($staleLogs as $stale) {
+            $stale->status = 1;
+            $stale->win_status = 0;
+            $stale->save();
+        }
+         = GameLog::where('status', 0)->where('user_id', @->user->id)->where('game_id', ->game->id);
+        if (->demoPlay) {
+            ->where('demo_play', Status::YES);
+        } else {
+            ->where(function ($q) {
+                $q->where('demo_play', Status::NO)->orWhereNull('demo_play');
+            });
+        }
+         = ->first();
         if ($running) {
             return ['error' => '1 game is in-complete. Please wait'];
         }

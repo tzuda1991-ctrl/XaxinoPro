@@ -61,11 +61,22 @@
         </div>
         <div class="col-lg-6">
             <div class="headtail-wrapper game-contet__sm">
-                <h4 class="game-contet-title">
-                    {{ $isDemo ? trans('Demo Balance:') : trans('Current Balance:') }}
-                    <span class="text user-balance">{{ showAmount($balance, currencyFormat: false) }}</span>
-                    {{ __(gs('cur_text')) }}
-                </h4>
+                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                    <h4 class="game-contet-title mb-0">
+                        {{ $isDemo ? trans('Demo Balance:') : trans('Real Balance:') }}
+                        <span class="text user-balance">{{ showAmount($balance, currencyFormat: false) }}</span>
+                        {{ __(gs('cur_text')) }}
+                    </h4>
+                    @if($isDemo)
+                        <a href="{{ route('user.play.game', $game->alias) }}" class="btn btn-sm btn--success py-1 px-3 text-white" style="border-radius: 6px; font-size: 13px;">
+                            <i class="fas fa-coins me-1"></i> @lang('Real Play (10,000 Balance)')
+                        </a>
+                    @else
+                        <a href="{{ route('user.play.game', [$game->alias, 'demo']) }}" class="btn btn-sm btn--secondary py-1 px-3 text-white" style="border-radius: 6px; font-size: 13px;">
+                            <i class="fas fa-gamepad me-1"></i> @lang('Demo Mode')
+                        </a>
+                    @endif
+                </div>
                 <form id="game" method="post">
                     @csrf
                     <div class="form-group">
@@ -248,9 +259,10 @@
         let minLimit = Number("{{ $game->min_limit }}");
         let maxLimit = Number("{{ $game->max_limit }}");
         let currency = "{{ gs('cur_text') }}";
-        investUrl = "{{ route('user.play.invest', ['roulette', @$isDemo]) }}";
-        gameEndUrl = "{{ route('user.play.end', ['roulette', @$isDemo]) }}";
-        audioAssetPath = `{{ asset('assets/audio') }}`;
+        var timer = 9000;
+        var investUrl = "{{ route('user.play.invest', ['roulette', @$isDemo]) }}";
+        var gameEndUrl = "{{ route('user.play.end', ['roulette', @$isDemo]) }}";
+        var audioAssetPath = `{{ asset('assets/audio') }}`;
 
         $(".minBtn").on('click', function(e) {
             playAudio(audioAssetPath, "click.mp3");
@@ -343,7 +355,8 @@
                 $data.removeClass('reveal');
                 var randomNumber = response.result;
                 color = null;
-                $inner.attr('data-spinto', randomNumber).find('li:nth-child(' + randomNumber + ') input').prop('checked', 'checked');
+                $inner.attr('data-spinto', randomNumber);
+                $inner.find('input[value="' + randomNumber + '"]').prop('checked', true);
                 $(this).hide();
                 $reset.addClass('disabled').prop('disabled', 'disabled').show();
                 $('.placeholder').remove();
@@ -381,7 +394,9 @@
                     };
                     var resStatus = 0;
                     $.post(gameEndUrl, data, function(response) {
-                        audio.pause();
+                        if (typeof audio !== 'undefined' && audio && typeof audio.pause === 'function') {
+                            try { audio.pause(); } catch(e) {}
+                        }
                         if (response.error) {
                             playAudio(audioAssetPath, "lose.wav");
                             running = 0;
@@ -444,27 +459,80 @@
 
 
 
-        @media (max-width:991px) {
+        /* Mobile Friendly Layout */
+        @media (max-width: 991px) {
+            .game-wrapper {
+                display: flex !important;
+                flex-direction: column !important;
+                row-gap: 15px !important;
+            }
+            /* 1. Wheel at the top */
+            .game-wrapper > div:nth-child(1) {
+                order: 1 !important;
+                margin-bottom: 0 !important;
+                width: 100% !important;
+            }
+            /* 2. Controls (Balance + Bet Input + Play Now) right under wheel */
+            .game-wrapper > div:nth-child(2) {
+                order: 2 !important;
+                margin-bottom: 0 !important;
+                width: 100% !important;
+            }
+            /* 3. Betting board table below controls */
+            .game-wrapper > div:nth-child(3) {
+                order: 3 !important;
+                width: 100% !important;
+            }
+            .headtail-body {
+                padding: 15px 10px !important;
+                min-height: auto !important;
+                border-radius: 12px !important;
+            }
+            .headtail-wrapper {
+                padding: 15px 12px !important;
+                border-radius: 12px !important;
+            }
+            .roulette-game-spin {
+                margin: 0 auto !important;
+                display: flex !important;
+                justify-content: center !important;
+                align-items: center !important;
+            }
+            .plate {
+                transform: scale(0.9) !important;
+                transform-origin: center center !important;
+                margin: -10px auto !important;
+            }
+            .roulette-wrapper {
+                height: auto !important;
+                max-height: 380px !important;
+                overflow-x: auto !important;
+                overflow-y: auto !important;
+                -webkit-overflow-scrolling: touch !important;
+                padding: 8px 4px !important;
+            }
             .game--card {
-                width: unset;
-            }
-
-            .game-wrapper div:nth-child(1) {
-                order: 1;
-            }
-
-            .game-wrapper div:nth-child(2) {
-                order: 3;
-            }
-
-            .game-wrapper div:nth-child(3) {
-                order: 2;
+                width: 100% !important;
+                padding: 10px !important;
+                border-radius: 12px !important;
             }
         }
 
-        @media (max-width:767px) {
-            .roulette-wrapper {
-                height: 728px;
+        @media (max-width: 480px) {
+            .plate {
+                transform: scale(0.78) !important;
+                margin: -25px auto !important;
+            }
+            .roulette-game-spin {
+                height: 240px !important;
+                overflow: hidden !important;
+            }
+            .headtail-body {
+                padding: 10px 5px !important;
+            }
+            .game-contet-title {
+                font-size: 1.1rem !important;
+                margin-bottom: 10px !important;
             }
         }
 

@@ -1,13 +1,18 @@
 let audioSound = 'true';
 let isRequest = false;
 let audioAssetPath = '';
-let audio;
+var audio = {
+    pause: function () {},
+    play: function () { return Promise.resolve(); }
+};
 
 function playAudio(audioAssetPath, filename) {
-    audio = new Audio(`${audioAssetPath}/${filename}`);
-    if (audioSound == 'true') {
-        audioOn();
-    }
+    try {
+        audio = new Audio(`${audioAssetPath}/${filename}`);
+        if (audioSound == 'true') {
+            audioOn();
+        }
+    } catch (e) {}
 }
 
 if (localStorage.getItem('audioStatus') !== null) {
@@ -20,11 +25,22 @@ if (localStorage.getItem('audioStatus') !== null) {
 }
 
 function audioPause() {
-    audio.pause();
+    if (typeof audio !== 'undefined' && audio && typeof audio.pause === 'function') {
+        try {
+            audio.pause();
+        } catch (e) {}
+    }
 }
 
 function audioOn() {
-    audio.play();
+    if (typeof audio !== 'undefined' && audio && typeof audio.play === 'function') {
+        try {
+            var playPromise = audio.play();
+            if (playPromise !== undefined && typeof playPromise.catch === 'function') {
+                playPromise.catch(function () {});
+            }
+        } catch (e) {}
+    }
 }
 
 $('.audioBtn').on('click', function () {
