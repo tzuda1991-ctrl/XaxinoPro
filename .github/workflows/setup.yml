@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       gdrive_link:
-        description: 'Apna Google Drive Share Link ya Release Direct URL dalein'
+        description: 'Apna Google Drive Share Link dalein'
         required: true
         default: 'PASTE_YOUR_GOOGLE_DRIVE_LINK_HERE'
 
@@ -18,31 +18,52 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Install gdown & Tools
+      - name: Install Python gdown & Tools
         run: |
-          pip install gdown
-          sudo apt-get update && sudo apt-get install -y unzip rsync
+          pip install -U gdown
+          sudo apt-get update && sudo apt-get install -y unzip rsync file p7zip-full
 
-      - name: Download ZIP from Google Drive or URL
+      - name: Download ZIP from Google Drive
         run: |
-          echo "Downloading Xaxino ZIP..."
-          gdown --fuzzy "${{ github.event.inputs.gdrive_link }}" -O xaxino.zip || curl -L "${{ github.event.inputs.gdrive_link }}" -o xaxino.zip
+          # Fix capital Https:// if present
+          RAW_URL="${{ github.event.inputs.gdrive_link }}"
+          CLEAN_URL=$(echo "$RAW_URL" | sed 's/^Https:/https:/g')
+          echo "Using URL: $CLEAN_URL"
+
+          # Download using gdown with fuzzy ID extraction
+          gdown --fuzzy "$CLEAN_URL" -O xaxino.zip
+
+          # Check file size & type
           ls -lh xaxino.zip
+          FILE_TYPE=$(file -b --mime-type xaxino.zip)
+          echo "Downloaded file MIME type: $FILE_TYPE"
+
+          if [ "$FILE_TYPE" = "text/html" ]; then
+            echo "❌ ERROR: ZIP ki jagah HTML page download hua hai! Kripya Google Drive mein file access ko 'Anyone with the link' par set karein."
+            exit 1
+          fi
 
       - name: Extract ZIP & Organize Files for Railway
         run: |
           mkdir -p temp_extract
-          unzip -q xaxino.zip -d temp_extract
+          7z x xaxino.zip -otemp_extract -y
 
-          # Find where 'core' and 'assets' are located inside the extracted folders
+          # Find where 'core' is located inside extracted folders
           CORE_DIR=$(find temp_extract -type d -name "core" | head -n 1)
           if [ -z "$CORE_DIR" ]; then
-            echo "Error: 'core' folder nahi mila! Checking nested zips..."
+            echo "Checking for nested zip inside archive..."
             NESTED_ZIP=$(find temp_extract -name "*.zip" | head -n 1)
             if [ -n "$NESTED_ZIP" ]; then
-              unzip -q "$NESTED_ZIP" -d temp_extract/nested
+              mkdir -p temp_extract/nested
+              7z x "$NESTED_ZIP" -otemp_extract/nested -y
               CORE_DIR=$(find temp_extract/nested -type d -name "core" | head -n 1)
             fi
+          fi
+
+          if [ -z "$CORE_DIR" ]; then
+            echo "❌ ERROR: 'core' folder archive ke andar nahi mila!"
+            ls -la temp_extract
+            exit 1
           fi
 
           PARENT_DIR=$(dirname "$CORE_DIR")
@@ -61,24 +82,21 @@ jobs:
           # Clean up temporary files
           rm -rf temp_extract xaxino.zip
 
-          # CRITICAL: Remove .gitignore inside core/ or vendor/ so vendor packages push to GitHub
+          # Remove .gitignore inside subfolders so vendor packages push to GitHub
           find . -mindepth 2 -name ".gitignore" -delete
           rm -f .gitignore
 
       - name: Patch HTTPS & Create Startup + Dockerfile
         run: |
-          # 1. Create startup script (Handles Port, Permissions & Optional Auto SQL Import)
           cat << 'EOF' > start.sh
           #!/bin/bash
           PORT=${PORT:-8080}
           sed -i "s/80/$PORT/g" /etc/apache2/sites-available/000-default.conf /etc/apache2/ports.conf
 
-          # Create basic core/.env if not present so ViserLab doesn't redirect to /install
           if [ ! -f /var/www/html/core/.env ]; then
             cp /var/www/html/core/.env.example /var/www/html/core/.env 2>/dev/null || touch /var/www/html/core/.env
           fi
 
-          # Auto-import database.sql if tables don't exist yet in Railway MySQL
           if [ -f /var/www/html/database.sql ] && [ -n "$DB_HOST" ]; then
             echo "Checking MySQL database tables..."
             TABLE_COUNT=$(mysql -h"$DB_HOST" -P"${DB_PORT:-3306}" -u"$DB_USERNAME" -p"$DB_PASSWORD" "$DB_DATABASE" -N -e "SHOW TABLES;" 2>/dev/null | wc -l)
@@ -86,8 +104,6 @@ jobs:
               echo "Empty database detected! Importing database.sql..."
               mysql -h"$DB_HOST" -P"${DB_PORT:-3306}" -u"$DB_USERNAME" -p"$DB_PASSWORD" "$DB_DATABASE" < /var/www/html/database.sql
               echo "Database imported successfully!"
-            else
-              echo "Database already has $TABLE_COUNT tables. Skipping SQL import."
             fi
           fi
 
@@ -98,7 +114,6 @@ jobs:
           EOF
           chmod +x start.sh
 
-          # 2. Create Railway Dockerfile
           cat << 'EOF' > Dockerfile
           FROM php:8.2-apache
 
@@ -126,5 +141,5 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add -A
-          git commit -m "Auto-extracted Xaxino 3.8 + Railway Docker & SQL Auto-Import Setup" || echo "No changes to commit"
+          git commit -m "Auto-extracted Xaxino 3.8 + Railway Docker Setup" || echo "No changes to commit"
           git push
