@@ -33,18 +33,17 @@
         </div>
 
         <!-- Wheel Section -->
-        <div class="col-lg-6">
-            <div class="headtail-body p-2 p-md-3 text-center" style="background: rgba(14, 18, 27, 0.7); border-radius: 20px; border: 1px solid rgba(255, 193, 7, 0.2); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-                @include('Template::partials.game_shape')
-                <div class="roulette-canvas-wrapper d-flex justify-content-center align-items-center py-2" style="position: relative; width: 100%; min-height: 350px;">
-                    <canvas id="rouletteCanvas" style="display: block; margin: 0 auto; filter: drop-shadow(0 12px 30px rgba(0,0,0,0.7)); max-width: 100%; height: auto;"></canvas>
+        <div class="col-lg-5 col-md-6 mb-2">
+            <div class="roulette-wheel-box p-1 p-sm-2 text-center rounded-4 shadow-sm" style="background: radial-gradient(circle at center, #151e2c 0%, #0a0f17 100%); border: 1px solid rgba(255, 215, 0, 0.25);">
+                <div class="roulette-canvas-wrapper d-flex justify-content-center align-items-center" style="position: relative; width: 100%;">
+                    <canvas id="rouletteCanvas" style="display: block; margin: 0 auto; filter: drop-shadow(0 6px 16px rgba(0,0,0,0.6)); max-width: 100%; height: auto;"></canvas>
                 </div>
             </div>
         </div>
 
         <!-- Controls & Chips Section -->
-        <div class="col-lg-6">
-            <div class="headtail-wrapper game-contet__sm p-3 rounded-4 shadow">
+        <div class="col-lg-7 col-md-6 mb-2">
+            <div class="headtail-wrapper game-contet__sm p-2 p-sm-3 rounded-4 shadow" style="background: rgba(18, 26, 38, 0.85); border: 1px solid rgba(255, 255, 255, 0.08);">
                 <!-- Balance & Mode Switch -->
                 <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
                     <div>
@@ -58,11 +57,11 @@
                     </div>
                     <div>
                         @if($isDemo)
-                            <a href="{{ route('user.play.game', $game->alias) }}" class="btn btn-sm btn-success px-3 py-1 shadow-sm" style="border-radius: 8px; font-size: 12px;">
+                            <a href="{{ route('user.play.game', $game->alias) }}" class="btn btn-sm btn-success px-3 py-1 shadow-sm fw-bold" style="border-radius: 8px; font-size: 12px;">
                                 <i class="fas fa-coins me-1"></i> @lang('Real Play (10,000 Balance)')
                             </a>
                         @else
-                            <a href="{{ route('user.play.game', [$game->alias, 'demo']) }}" class="btn btn-sm btn-secondary px-3 py-1 shadow-sm" style="border-radius: 8px; font-size: 12px;">
+                            <a href="{{ route('user.play.game', [$game->alias, 'demo']) }}" class="btn btn-sm btn-secondary px-3 py-1 shadow-sm fw-bold" style="border-radius: 8px; font-size: 12px;">
                                 <i class="fas fa-gamepad me-1"></i> @lang('Demo Mode')
                             </a>
                         @endif
@@ -70,8 +69,8 @@
                 </div>
 
                 <!-- Chips Selection Tray -->
-                <div class="chips-container my-3 p-2 rounded-3 text-center">
-                    <div class="d-flex justify-content-between align-items-center mb-2 px-1">
+                <div class="chips-container my-2 p-2 rounded-3 text-center">
+                    <div class="d-flex justify-content-between align-items-center mb-1 px-1">
                         <small class="text-white-50 fw-bold text-uppercase" style="font-size: 11px;">
                             <i class="fas fa-coins me-1 text-warning"></i> Select Chip & Tap on Table
                         </small>
@@ -108,7 +107,7 @@
                 </div>
 
                 <!-- Live Bet Summary & Action Buttons -->
-                <div class="d-flex justify-content-between align-items-center bg-dark bg-opacity-50 p-2 rounded-3 mb-3 border border-secondary border-opacity-25">
+                <div class="d-flex justify-content-between align-items-center bg-dark bg-opacity-50 p-2 rounded-3 mb-2 border border-secondary border-opacity-25">
                     <div>
                         <small class="text-muted d-block" style="font-size: 11px;">TOTAL BET</small>
                         <span class="fw-bold text-white fs-5" id="totalBetDisplay">0.00</span>
@@ -825,8 +824,13 @@
             }
             /* Clean Canvas Wheel Layout */
             .roulette-canvas-wrapper {
-                min-height: 310px !important;
-            }
+            position: relative;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
             .roulette-wrapper table tr td {
                 height: 29px !important;
                 max-height: 29px !important;

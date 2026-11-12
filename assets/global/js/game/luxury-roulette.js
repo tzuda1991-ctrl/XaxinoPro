@@ -58,9 +58,12 @@
 
     LuxuryRouletteWheel.prototype.resize = function() {
         var container = this.canvas.parentElement;
-        var rect = container ? container.getBoundingClientRect() : { width: 360, height: 360 };
-        var size = Math.min(rect.width || 360, 380);
-        if (size < 280) size = 280;
+        var winW = window.innerWidth;
+        // On mobile (< 576px), make wheel compact (270px-285px) so all controls and board fit on screen without excessive scrolling
+        var maxSize = winW < 576 ? Math.min(winW - 24, 280) : (winW < 992 ? 310 : 340);
+        var rect = container ? container.getBoundingClientRect() : { width: maxSize, height: maxSize };
+        var size = Math.min(rect.width || maxSize, maxSize);
+        if (size < 240) size = 240;
 
         var dpr = window.devicePixelRatio || 1;
         this.canvas.width = size * dpr;
@@ -72,7 +75,7 @@
         this.dpr = dpr;
         this.centerX = (size * dpr) / 2;
         this.centerY = (size * dpr) / 2;
-        this.radius = (size * dpr) / 2 - (6 * dpr);
+        this.radius = (size * dpr) / 2 - (5 * dpr);
     };
 
     LuxuryRouletteWheel.prototype.spinTo = function(winningNumber, callback) {
