@@ -5,6 +5,11 @@
 
     RewriteEngine On
 
+    # Block direct HTTP access to core folder and sensitive files
+    RewriteRule ^core/ - [F,L]
+    RewriteRule ^\.env - [F,L]
+    RewriteRule \.(sql|sh|lock|md|git)$ - [F,L]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
@@ -19,8 +24,8 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 
-    <Files .env>
+    <FilesMatch "^(\.env|.*\.sql|start\.sh|Dockerfile)$">
         Order allow,deny
         Deny from all
-    </Files>
+    </FilesMatch>
 </IfModule>

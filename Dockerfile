@@ -6,7 +6,23 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install pdo_mysql mysqli mbstring exif pcntl bcmath gd zip intl soap
 
-RUN a2enmod rewrite
+# Enable Apache modules: rewrite, headers, env
+RUN a2enmod rewrite headers env
+
+# Apache VirtualHost & Directory Configuration for Laravel
+RUN echo '<Directory /var/www/html>' > /etc/apache2/conf-available/xaxino.conf \
+    && echo '    Options -Indexes +FollowSymLinks' >> /etc/apache2/conf-available/xaxino.conf \
+    && echo '    AllowOverride All' >> /etc/apache2/conf-available/xaxino.conf \
+    && echo '    Require all granted' >> /etc/apache2/conf-available/xaxino.conf \
+    && echo '</Directory>' >> /etc/apache2/conf-available/xaxino.conf \
+    && echo 'SetEnvIf X-Forwarded-Proto https HTTPS=on' >> /etc/apache2/conf-available/xaxino.conf \
+    && a2enconf xaxino
+
+# Increase PHP memory & upload limits
+RUN echo 'memory_limit = 512M' > /usr/local/etc/php/conf.d/xaxino-limits.ini \
+    && echo 'upload_max_filesize = 64M' >> /usr/local/etc/php/conf.d/xaxino-limits.ini \
+    && echo 'post_max_size = 64M' >> /usr/local/etc/php/conf.d/xaxino-limits.ini \
+    && echo 'max_execution_time = 300' >> /usr/local/etc/php/conf.d/xaxino-limits.ini
 
 WORKDIR /var/www/html
 COPY . /var/www/html
