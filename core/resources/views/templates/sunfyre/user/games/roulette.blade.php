@@ -34,60 +34,10 @@
 
         <!-- Wheel Section -->
         <div class="col-lg-6">
-            <div class="headtail-body p-2 p-md-3">
+            <div class="headtail-body p-2 p-md-3 text-center" style="background: rgba(14, 18, 27, 0.7); border-radius: 20px; border: 1px solid rgba(255, 193, 7, 0.2); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
                 @include('Template::partials.game_shape')
-                <div class="headtail-body__flip">
-                    <div class="roulette-game-spin">
-                        <div class="plate" id="plate">
-                            <ul class="inner">
-                                <li class="number"><label><input name="pit" type="radio" value="32" /><span class="pit">32</span></label></li>
-                                <li class="number"><label><input name="pit" type="radio" value="15" /><span class="pit">15</span></label></li>
-                                <li class="number"><label><input name="pit" type="radio" value="19" /><span class="pit">19</span></label></li>
-                                <li class="number"><label><input name="pit" type="radio" value="4" /><span class="pit">4</span></label></li>
-                                <li class="number"><label><input name="pit" type="radio" value="21" /><span class="pit">21</span></label></li>
-                                <li class="number"><label><input name="pit" type="radio" value="2" /><span class="pit">2</span></label></li>
-                                <li class="number"><label><input name="pit" type="radio" value="25" /><span class="pit">25</span></label></li>
-                                <li class="number"><label><input name="pit" type="radio" value="17" /><span class="pit">17</span></label></li>
-                                <li class="number"><label><input name="pit" type="radio" value="34" /><span class="pit">34</span></label></li>
-                                <li class="number"><label><input name="pit" type="radio" value="6" /><span class="pit">6</span></label></li>
-                                <li class="number"><label><input name="pit" type="radio" value="27" /><span class="pit">27</span></label></li>
-                                <li class="number"><label><input name="pit" type="radio" value="13" /><span class="pit">13</span></label></li>
-                                <li class="number"><label><input name="pit" type="radio" value="36" /><span class="pit">36</span></label></li>
-                                <li class="number"><label><input name="pit" type="radio" value="11" /><span class="pit">11</span></label></li>
-                                <li class="number"><label><input name="pit" type="radio" value="30" /><span class="pit">30</span></label></li>
-                                <li class="number"><label><input name="pit" type="radio" value="8" /><span class="pit">8</span></label></li>
-                                <li class="number"><label><input name="pit" type="radio" value="23" /><span class="pit">23</span></label></li>
-                                <li class="number"><label><input name="pit" type="radio" value="10" /><span class="pit">10</span></label></li>
-                                <li class="number"><label><input name="pit" type="radio" value="5" /><span class="pit">5</span></label></li>
-                                <li class="number"><label><input name="pit" type="radio" value="24" /><span class="pit">24</span></label></li>
-                                <li class="number"><label><input name="pit" type="radio" value="16" /><span class="pit">16</span></label></li>
-                                <li class="number"><label><input name="pit" type="radio" value="33" /><span class="pit">33</span></label></li>
-                                <li class="number"><label><input name="pit" type="radio" value="1" /><span class="pit">1</span></label></li>
-                                <li class="number"><label><input name="pit" type="radio" value="20" /><span class="pit">20</span></label></li>
-                                <li class="number"><label><input name="pit" type="radio" value="14" /><span class="pit">14</span></label></li>
-                                <li class="number"><label><input name="pit" type="radio" value="31" /><span class="pit">31</span></label></li>
-                                <li class="number"><label><input name="pit" type="radio" value="9" /><span class="pit">9</span></label></li>
-                                <li class="number"><label><input name="pit" type="radio" value="22" /><span class="pit">22</span></label></li>
-                                <li class="number"><label><input name="pit" type="radio" value="18" /><span class="pit">18</span></label></li>
-                                <li class="number"><label><input name="pit" type="radio" value="29" /><span class="pit">29</span></label></li>
-                                <li class="number"><label><input name="pit" type="radio" value="7" /><span class="pit">7</span></label></li>
-                                <li class="number"><label><input name="pit" type="radio" value="28" /><span class="pit">28</span></label></li>
-                                <li class="number"><label><input name="pit" type="radio" value="12" /><span class="pit">12</span></label></li>
-                                <li class="number"><label><input name="pit" type="radio" value="35" /><span class="pit">35</span></label></li>
-                                <li class="number"><label><input name="pit" type="radio" value="3" /><span class="pit">3</span></label></li>
-                                <li class="number"><label><input name="pit" type="radio" value="26" /><span class="pit">26</span></label></li>
-                                <li class="number"><label><input name="pit" type="radio" value="0" /><span class="pit">0</span></label></li>
-                            </ul>
-                            <div class="data">
-                                <div class="data-inner">
-                                    <div class="mask"></div>
-                                    <div class="result">
-                                        <div class="result-number">00</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="roulette-canvas-wrapper d-flex justify-content-center align-items-center py-2" style="position: relative; width: 100%; min-height: 350px;">
+                    <canvas id="rouletteCanvas" style="display: block; margin: 0 auto; filter: drop-shadow(0 12px 30px rgba(0,0,0,0.7)); max-width: 100%; height: auto;"></canvas>
                 </div>
             </div>
         </div>
@@ -362,7 +312,7 @@
 @push('script-lib')
     <script src="{{ asset('assets/global/js/soundControl.js') }}"></script>
     <script src="{{ asset('assets/global/js/game/hammer.min.js') }}"></script>
-    <script src="{{ asset('assets/global/js/game/roulette-wheel.js') }}"></script>
+    <script src="{{ asset('assets/global/js/game/luxury-roulette.js') }}"></script>
 @endpush
 
 @push('script')
@@ -614,43 +564,27 @@
                 }
             }
 
+            // Initialize Luxury Canvas Roulette Wheel
+            var luxuryWheel = new LuxuryRouletteWheel('rouletteCanvas');
+
             // Animate Wheel to Winning Number & Settle Round
             function finishRoundSpin(winningNumber, gameLogId, totalBet) {
-                $('.roulette-game-spin').addClass('spin-active');
-                $('.number').removeClass('active-pit');
                 if (typeof playAudio === 'function') {
                     playAudio(audioAssetPath, "spin.mp3");
                 }
 
-                var $inner = $('.inner');
-                $inner.removeAttr('data-spinto').removeClass('rest');
-                if ($inner[0]) void $inner[0].offsetHeight;
-                $inner.attr('data-spinto', winningNumber);
-                $inner.find('input[value="' + winningNumber + '"]').prop('checked', true);
-
-                $('.data').removeClass('reveal');
-                $('.mask').text('');
-
-                // 9 seconds spin animation
-                setTimeout(function() {
+                // Spin the Luxury Canvas Wheel to the exact target pocket
+                luxuryWheel.spinTo(winningNumber, function(finalNum) {
                     var winColor = 'black';
-                    if (redNumbers.indexOf(winningNumber) !== -1) {
+                    if (redNumbers.indexOf(finalNum) !== -1) {
                         winColor = 'red';
-                    } else if (winningNumber === 0) {
+                    } else if (finalNum === 0) {
                         winColor = 'green';
                     }
 
-                    $('.result-number').text(winningNumber);
-                    $('.result-color').text(winColor);
-                    $('.result').css({'background-color': winColor});
-                    $('.data').addClass('reveal');
-                    $inner.addClass('rest');
-                    // Highlight the exact winning pocket on the wheel plate
-                    $('input[name="pit"][value="' + winningNumber + '"]').closest('.number').addClass('active-pit');
-
                     // Add to top history ribbon
                     var histClass = winColor === 'red' ? 'bg-danger' : (winColor === 'green' ? 'bg-success' : 'bg-dark');
-                    $('#historyRibbon').prepend('<span class="history-chip ' + histClass + ' animate__animated animate__bounceIn">' + winningNumber + '</span>');
+                    $('#historyRibbon').prepend('<span class="history-chip ' + histClass + ' animate__animated animate__bounceIn">' + finalNum + '</span>');
                     if ($('#historyRibbon .history-chip').length > 10) {
                         $('#historyRibbon .history-chip:last').remove();
                     }
@@ -665,15 +599,15 @@
                             data: {
                                 _token: csrfToken,
                                 game_log_id: gameLogId,
-                                winNumber: winningNumber
+                                winNumber: finalNum
                             },
                             success: function(endRes) {
                                 if (endRes.win_status === 1) {
                                     if (typeof playAudio === 'function') playAudio(audioAssetPath, 'win.wav');
-                                    notify('success', '🎉 YOU WON! Winning Number: ' + winningNumber + ' (' + winColor.toUpperCase() + ')');
+                                    notify('success', '🎉 YOU WON! Winning Number: ' + finalNum + ' (' + winColor.toUpperCase() + ')');
                                 } else {
                                     if (typeof playAudio === 'function') playAudio(audioAssetPath, 'lose.wav');
-                                    notify('info', 'Winning Number: ' + winningNumber + ' (' + winColor.toUpperCase() + ')');
+                                    notify('info', 'Winning Number: ' + finalNum + ' (' + winColor.toUpperCase() + ')');
                                 }
 
                                 if (endRes.bal) {
@@ -687,18 +621,16 @@
                         });
                     } else {
                         // Demo auto spin result notification
-                        notify('info', 'Round Finished! Winning Number: ' + winningNumber + ' (' + winColor.toUpperCase() + ')');
+                        notify('info', 'Round Finished! Winning Number: ' + finalNum + ' (' + winColor.toUpperCase() + ')');
                         resetForNextRound();
                     }
-
-                }, 9000);
+                });
             }
 
             function resetForNextRound() {
                 setTimeout(function() {
                     isWheelSpinning = false;
-                    $('.roulette-game-spin').removeClass('spin-active');
-                    $('.number').removeClass('active-pit');
+                    luxuryWheel.reset();
                     placedBets = {};
                     betHistoryStack = [];
                     renderTableChips();
@@ -825,14 +757,7 @@
             .game-wrapper > div:nth-child(3) { order: 3 !important; }
             .game-wrapper > div:nth-child(4) { order: 4 !important; }
 
-            .roulette-game-spin {
-                height: 220px !important;
-                margin: 0 auto !important;
-                display: flex !important;
-                justify-content: center !important;
-                align-items: center !important;
-                overflow: hidden !important;
-            }
+            /* Canvas wheel container */
             .plate {
                 transform: scale(0.78) !important;
                 margin: -30px auto !important;
@@ -898,12 +823,9 @@
             .chip-val {
                 font-size: 10px;
             }
-            .plate {
-                transform: scale(0.70) !important;
-                margin: -40px auto !important;
-            }
-            .roulette-game-spin {
-                height: 195px !important;
+            /* Clean Canvas Wheel Layout */
+            .roulette-canvas-wrapper {
+                min-height: 310px !important;
             }
             .roulette-wrapper table tr td {
                 height: 29px !important;
