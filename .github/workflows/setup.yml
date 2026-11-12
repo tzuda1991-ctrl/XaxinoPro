@@ -25,13 +25,17 @@ jobs:
 
       - name: Download ZIP from Google Drive
         run: |
-          # Fix capital Https:// if present
           RAW_URL="${{ github.event.inputs.gdrive_link }}"
-          CLEAN_URL=$(echo "$RAW_URL" | sed 's/^Https:/https:/g')
-          echo "Using URL: $CLEAN_URL"
-
-          # Download using gdown with fuzzy ID extraction
-          gdown --fuzzy "$CLEAN_URL" -O xaxino.zip
+          
+          # URL mein se automatic Google Drive File ID extract karega
+          if [[ "$RAW_URL" =~ /d/([a-zA-Z0-9_-]+) ]]; then
+            FILE_ID="${BASH_REMATCH[1]}"
+            echo "Extracted File ID from URL"
+            gdown "$FILE_ID" -O xaxino.zip
+          else
+            CLEAN_URL=$(echo "$RAW_URL" | sed 's/^Https:/https:/g')
+            gdown "$CLEAN_URL" -O xaxino.zip
+          fi
 
           # Check file size & type
           ls -lh xaxino.zip
@@ -39,7 +43,7 @@ jobs:
           echo "Downloaded file MIME type: $FILE_TYPE"
 
           if [ "$FILE_TYPE" = "text/html" ]; then
-            echo "❌ ERROR: ZIP ki jagah HTML page download hua hai! Kripya Google Drive mein file access ko 'Anyone with the link' par set karein."
+            echo "❌ ERROR: ZIP ki jagah HTML page download hua hai! Google Drive mein file access ko 'Anyone with the link' par set karein."
             exit 1
           fi
 
@@ -79,8 +83,9 @@ jobs:
             echo "Copied SQL file to ./database.sql"
           fi
 
-          # Clean up temporary files
+          # Clean up temporary files and any leftover >95MB files (GitHub limit protection)
           rm -rf temp_extract xaxino.zip
+          find . -path ./.git -prune -o -type f -size +95M -exec rm -f {} +
 
           # Remove .gitignore inside subfolders so vendor packages push to GitHub
           find . -mindepth 2 -name ".gitignore" -delete
