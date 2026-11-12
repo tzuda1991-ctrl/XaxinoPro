@@ -617,6 +617,7 @@
             // Animate Wheel to Winning Number & Settle Round
             function finishRoundSpin(winningNumber, gameLogId, totalBet) {
                 $('.roulette-game-spin').addClass('spin-active');
+                $('.number').removeClass('active-pit');
                 if (typeof playAudio === 'function') {
                     playAudio(audioAssetPath, "spin.mp3");
                 }
@@ -644,6 +645,8 @@
                     $('.result').css({'background-color': winColor});
                     $('.data').addClass('reveal');
                     $inner.addClass('rest');
+                    // Highlight the exact winning pocket on the wheel plate
+                    $('input[name="pit"][value="' + winningNumber + '"]').closest('.number').addClass('active-pit');
 
                     // Add to top history ribbon
                     var histClass = winColor === 'red' ? 'bg-danger' : (winColor === 'green' ? 'bg-success' : 'bg-dark');
@@ -695,6 +698,7 @@
                 setTimeout(function() {
                     isWheelSpinning = false;
                     $('.roulette-game-spin').removeClass('spin-active');
+                    $('.number').removeClass('active-pit');
                     placedBets = {};
                     betHistoryStack = [];
                     renderTableChips();

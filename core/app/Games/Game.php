@@ -240,21 +240,21 @@ abstract class Game {
     }
 
     private function fallback() {
-         = ->demoPlay ? @->user->demo_balance : @->user->balance;
-        if (->request->invest > ) {
+        $balance = $this->demoPlay ? @$this->user->demo_balance : @$this->user->balance;
+        if ($this->request->invest > $balance) {
             return ['error' => 'Oops! You have no sufficient balance'];
         }
         // Auto-complete any previous incomplete game logs for this user so user is never locked out
-        if (@->user->id) {
+        if (@$this->user->id) {
             GameLog::where('status', 0)
-                ->where('user_id', ->user->id)
-                ->where('game_id', ->game->id)
+                ->where('user_id', $this->user->id)
+                ->where('game_id', $this->game->id)
                 ->update(['status' => 1, 'win_status' => 0]);
         }
-        if (->request->invest > ->game->max_limit) {
+        if ($this->request->invest > $this->game->max_limit) {
             return ['error' => 'Please follow the maximum limit of invest'];
         }
-        if (->request->invest < ->game->min_limit) {
+        if ($this->request->invest < $this->game->min_limit) {
             return ['error' => 'Please follow the minimum limit of invest'];
         }
         return ['success'];
