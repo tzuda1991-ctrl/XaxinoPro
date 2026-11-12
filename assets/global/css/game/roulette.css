@@ -251,10 +251,10 @@ button:focus {
     .roulette-wrapper {
         height: auto !important;
         position: relative !important;
-        overflow-x: auto !important;
-        overflow-y: hidden !important;
-        -webkit-overflow-scrolling: touch !important;
-        padding: 10px 4px !important;
+        overflow: hidden !important;
+        padding: 4px 2px !important;
+        width: 100% !important;
+        max-width: 100% !important;
     }
     .roulette-wrapper table {
         position: relative !important;
@@ -263,7 +263,10 @@ button:focus {
         transform: none !important;
         -webkit-transform: none !important;
         -ms-transform: none !important;
-        min-width: 600px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        table-layout: fixed !important;
         margin: 0 auto !important;
     }
 }

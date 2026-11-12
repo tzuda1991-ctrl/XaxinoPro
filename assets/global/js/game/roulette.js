@@ -1,239 +1,143 @@
-$(".oneToTw").mouseover(function () {
-    $(".oneToTwEl").addClass("__select");
-});
+// Multi-bet Roulette Manager
+var selectedBets = [];
 
-$(".oneToTw").mouseout(function () {
-    $(".oneToTwEl").removeClass("__select");
-});
-$(".thrtToTf").mouseover(function () {
-    $(".thrtToTfEl").addClass("__select");
-});
+var rouletteGroups = {
+    'oneToTw': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    'thrtToTf': [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
+    'twfToTs': [25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36],
+    'oneToEt': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
+    'nineteenTtsix': [19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36],
+    'even': [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36],
+    'odd': [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35],
+    'red': [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36],
+    'black': [2, 4, 6, 8, 10, 11, 13, 15, 17, 20, 22, 24, 26, 28, 29, 31, 33, 35],
+    'twByOne1': [3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36],
+    'twByOne2': [2, 5, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35],
+    'twByOne3': [1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34]
+};
 
-$(".thrtToTf").mouseout(function () {
-    $(".thrtToTfEl").removeClass("__select");
-});
+function syncRouletteUI() {
+    $('table td').removeClass('selected');
 
-$(".twfToTs").mouseover(function () {
-    $(".twfToTsEl").addClass("__select");
-});
+    selectedBets.forEach(function (num) {
+        $('table td').filter(function () {
+            var txt = $(this).find('.number-item').text().trim();
+            return txt === num.toString();
+        }).addClass('selected');
+    });
 
-$(".twfToTs").mouseout(function () {
-    $(".twfToTsEl").removeClass("__select");
-});
-
-$(".oneToEt").mouseover(function () {
-    $(".oneToEtEl").addClass("__select");
-});
-
-$(".oneToEt").mouseout(function () {
-    $(".oneToEtEl").removeClass("__select");
-});
-
-$(".nineteenTtsix").mouseover(function () {
-    $(".nineteenTtsixEl").addClass("__select");
-});
-
-$(".nineteenTtsix").mouseout(function () {
-    $(".nineteenTtsixEl").removeClass("__select");
-});
-
-$(".even").mouseover(function () {
-    $(".evenEl").addClass("__select");
-});
-
-$(".even").mouseout(function () {
-    $(".evenEl").removeClass("__select");
-});
-
-$(".odd").mouseover(function () {
-    $(".oddEl").addClass("__select");
-});
-
-$(".odd").mouseout(function () {
-    $(".oddEl").removeClass("__select");
-});
-
-$(".red").mouseover(function () {
-    $(".redEl").addClass("__select");
-});
-
-$(".red").mouseout(function () {
-    $(".redEl").removeClass("__select");
-});
-
-$(".black").mouseover(function () {
-    $(".blackEl").addClass("__select");
-});
-
-$(".black").mouseout(function () {
-    $(".blackEl").removeClass("__select");
-});
-
-$(".twByOne1").mouseover(function () {
-    $(this).parents("tr").find("td").addClass("__select");
-    $(this).parents("tr").find(".zero").removeClass("__select");
-    $(this).removeClass("__select");
-});
-
-$(".twByOne1").mouseout(function () {
-    $(this).parents("tr").find("td").removeClass("__select");
-});
-
-$(".twByOne2").mouseover(function () {
-    $(this).parents("tr").find("td").addClass("__select");
-    $(this).removeClass("__select");
-});
-
-$(".twByOne2").mouseout(function () {
-    $(this).parents("tr").find("td").removeClass("__select");
-});
-
-$(".twByOne3").mouseover(function () {
-    $(this).parents("tr").find("td").addClass("__select");
-    $(this).removeClass("__select");
-});
-
-$(".twByOne3").mouseout(function () {
-    $(this).parents("tr").find("td").removeClass("__select");
-});
-
-//Click
-var aroVal = 0;
-$("td").click(function () {
-    if (!$(this).find(".badge-success").hasClass("badge-success")) {
-        $(".badge-success").remove();
-    }
-    if ($("td").hasClass("selected")) {
-        $("td").removeClass("selected");
-    }
-    val = parseFloat($("input[name=amount]").val());
-    $(this).addClass("selected");
-    if (!$(this).find(".badge-success").hasClass("badge-success")) {
-        aroVal = val;
-        $("input[name=bet]").val(val);
-    } else {
-        aroVal += val;
-        if (aroVal <= 1000) {
-            $(this).find(".badge-success").text(aroVal);
-            $("input[name=bet]").val(aroVal);
+    for (var groupClass in rouletteGroups) {
+        var nums = rouletteGroups[groupClass];
+        var allIn = nums.length > 0 && nums.every(function (n) {
+            return selectedBets.indexOf(n) > -1;
+        });
+        if (allIn) {
+            $('.' + groupClass).addClass('selected');
+        } else {
+            $('.' + groupClass).removeClass('selected');
         }
     }
-    if ($(this).find(".number-item").text()) {
-        var numberItem = $(this).find(".number-item").text();
-        $("input[name=choose]").val(numberItem);
-    }
-});
 
-$(".clear-btn").click(function () {
-    $("input[name=bet]").val("0");
-    $("td").removeClass("selected");
-    $("td").find(".custom-badge").remove();
-});
+    if (selectedBets.length === 0) {
+        $('input[name=choose]').val('');
+    } else {
+        $('input[name=choose]').val(selectedBets.join(','));
+    }
 
-$(".oneToTw").click(function () {
-    if ($("td").hasClass("selected")) {
-        $("td").removeClass("selected");
-        $("td").find("input[type=hidden]").removeAttr("name");
+    if (typeof updateBonusDisplay === 'function') {
+        updateBonusDisplay();
     }
-    $(".oneToTwEl").addClass("selected one");
-    $("input[name=choose]").val("1_12");
-});
-$(".thrtToTf").click(function () {
-    if ($("td").hasClass("selected")) {
-        $("td").removeClass("selected");
-        $("td").find("input[type=hidden]").removeAttr("name");
-    }
-    $(".thrtToTfEl").addClass("selected");
-    $("input[name=choose]").val("13_24");
-});
+}
 
-$(".twfToTs").click(function () {
-    if ($("td").hasClass("selected")) {
-        $("td").removeClass("selected");
-        $("td").find("input[type=hidden]").removeAttr("name");
-    }
-    $(".twfToTsEl").addClass("selected");
-    $("input[name=choose]").val("25_36");
-});
+function toggleNumberBet(num) {
+    num = parseInt(num, 10);
+    if (isNaN(num) || num < 0 || num > 36) return;
 
-$(".oneToEt").click(function () {
-    if ($("td").hasClass("selected")) {
-        $("td").removeClass("selected");
-        $("td").find("input[type=hidden]").removeAttr("name");
+    var idx = selectedBets.indexOf(num);
+    if (idx > -1) {
+        selectedBets.splice(idx, 1);
+    } else {
+        selectedBets.push(num);
     }
-    $(".oneToEtEl").addClass("selected");
-    $("input[name=choose]").val("1_18");
-});
+    syncRouletteUI();
+}
 
-$(".nineteenTtsix").click(function () {
-    if ($("td").hasClass("selected")) {
-        $("td").removeClass("selected");
-        $("td").find("input[type=hidden]").removeAttr("name");
-    }
-    $("input[name=choose]").val("19_36");
-    $(".nineteenTtsixEl").addClass("selected");
-});
+function toggleGroupBet(groupClass) {
+    var nums = rouletteGroups[groupClass];
+    if (!nums || !nums.length) return;
 
-$(".even").click(function () {
-    if ($("td").hasClass("selected")) {
-        $("td").removeClass("selected");
-        $("td").find("input[type=hidden]").removeAttr("name");
-    }
-    $("input[name=choose]").val("even");
-    $(".evenEl").addClass("selected");
-});
+    var allIn = nums.every(function (n) {
+        return selectedBets.indexOf(n) > -1;
+    });
 
-$(".odd").click(function () {
-    if ($("td").hasClass("selected")) {
-        $("td").removeClass("selected");
-        $("td").find("input[type=hidden]").removeAttr("name");
+    if (allIn) {
+        // Deselect group numbers
+        selectedBets = selectedBets.filter(function (n) {
+            return nums.indexOf(n) === -1;
+        });
+    } else {
+        // Add all group numbers
+        nums.forEach(function (n) {
+            if (selectedBets.indexOf(n) === -1) {
+                selectedBets.push(n);
+            }
+        });
     }
-    $(".oddEl").addClass("selected");
-    $("input[name=choose]").val("odd");
-});
+    syncRouletteUI();
+}
 
-$(".red").click(function () {
-    if ($("td").hasClass("selected")) {
-        $("td").removeClass("selected");
-        $("td").find("input[type=hidden]").removeAttr("name");
-    }
-    $(".redEl").addClass("selected");
-    $("input[name=choose]").val("red");
-});
+function clearAllBets() {
+    selectedBets = [];
+    syncRouletteUI();
+}
 
-$(".black").click(function () {
-    if ($("td").hasClass("selected")) {
-        $("td").removeClass("selected");
-        $("td").find("input[type=hidden]").removeAttr("name");
-    }
-    $(".blackEl").addClass("selected");
-    $("input[name=choose]").val("black");
-});
+$(function () {
+    // Hover effects on desktop
+    $(".oneToTw").hover(function () { $(".oneToTwEl").addClass("__select"); }, function () { $(".oneToTwEl").removeClass("__select"); });
+    $(".thrtToTf").hover(function () { $(".thrtToTfEl").addClass("__select"); }, function () { $(".thrtToTfEl").removeClass("__select"); });
+    $(".twfToTs").hover(function () { $(".twfToTsEl").addClass("__select"); }, function () { $(".twfToTsEl").removeClass("__select"); });
+    $(".oneToEt").hover(function () { $(".oneToEtEl").addClass("__select"); }, function () { $(".oneToEtEl").removeClass("__select"); });
+    $(".nineteenTtsix").hover(function () { $(".nineteenTtsixEl").addClass("__select"); }, function () { $(".nineteenTtsixEl").removeClass("__select"); });
+    $(".even").hover(function () { $(".evenEl").addClass("__select"); }, function () { $(".evenEl").removeClass("__select"); });
+    $(".odd").hover(function () { $(".oddEl").addClass("__select"); }, function () { $(".oddEl").removeClass("__select"); });
+    $(".red").hover(function () { $(".redEl").addClass("__select"); }, function () { $(".redEl").removeClass("__select"); });
+    $(".black").hover(function () { $(".blackEl").addClass("__select"); }, function () { $(".blackEl").removeClass("__select"); });
 
-$(".twByOne1").click(function () {
-    if ($("td").hasClass("selected")) {
-        $("td").removeClass("selected");
-        $("td").find("input[type=hidden]").removeAttr("name");
-    }
-    $(this).parents("tr").find("td").addClass("selected");
-    $(this).parents("tr").find(".zero").removeClass("selected");
-    $("input[name=choose]").val("2_1_1");
-});
+    // Handle clicks on individual number cells
+    $('table td').on('click', function (e) {
+        var $td = $(this);
+        var $numItem = $td.find('.number-item');
 
-$(".twByOne2").click(function () {
-    if ($("td").hasClass("selected")) {
-        $("td").removeClass("selected");
-        $("td").find("input[type=hidden]").removeAttr("name");
-    }
-    $(this).parents("tr").find("td").addClass("selected");
-    $("input[name=choose]").val("2_1_2");
-});
+        // Check if clicked cell is an individual number
+        if ($numItem.length) {
+            var numText = $numItem.text().trim();
+            if (numText !== '') {
+                toggleNumberBet(numText);
+                if (typeof audioAssetPath !== 'undefined' && typeof playAudio === 'function') {
+                    playAudio(audioAssetPath, "click.mp3");
+                }
+                return;
+            }
+        }
 
-$(".twByOne3").click(function () {
-    if ($("td").hasClass("selected")) {
-        $("td").removeClass("selected");
-        $("td").find("input[type=hidden]").removeAttr("name");
-    }
-    $(this).parents("tr").find("td").addClass("selected");
-    $("input[name=choose]").val("2_1_3");
+        // Check if clicked cell is a group
+        for (var groupClass in rouletteGroups) {
+            if ($td.hasClass(groupClass)) {
+                toggleGroupBet(groupClass);
+                if (typeof audioAssetPath !== 'undefined' && typeof playAudio === 'function') {
+                    playAudio(audioAssetPath, "click.mp3");
+                }
+                return;
+            }
+        }
+    });
+
+    // Clear bets button
+    $('.clear-bets-btn, .clear-btn').on('click', function (e) {
+        e.preventDefault();
+        clearAllBets();
+        if (typeof audioAssetPath !== 'undefined' && typeof playAudio === 'function') {
+            playAudio(audioAssetPath, "click.mp3");
+        }
+    });
 });
