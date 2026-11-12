@@ -145,7 +145,7 @@ abstract class Game {
         }
 
         if ($gameLog->win_status == Status::WIN) {
-            $winBon = $gameLog->invest * $this->game->win / 100;
+            $winBon = ($gameLog->win_amo > 0) ? $gameLog->win_amo : ($gameLog->invest * $this->game->win / 100);
             $amount = $winBon;
 
             $investBack = 0;
@@ -240,37 +240,21 @@ abstract class Game {
     }
 
     private function fallback() {
-        $balance = $this->demoPlay ? @$this->user->demo_balance : @$this->user->balance;
-        if ($this->request->invest > $balance) {
+         = ->demoPlay ? @->user->demo_balance : @->user->balance;
+        if (->request->invest > ) {
             return ['error' => 'Oops! You have no sufficient balance'];
         }
-        // Auto-complete any stale stuck game logs older than 20 seconds so user is never locked out
-        $staleLogs = GameLog::where('status', 0)
-            ->where('user_id', @$this->user->id)
-            ->where('game_id', $this->game->id)
-            ->where('created_at', '<', now()->subSeconds(20))
-            ->get();
-        foreach ($staleLogs as $stale) {
-            $stale->status = 1;
-            $stale->win_status = 0;
-            $stale->save();
+        // Auto-complete any previous incomplete game logs for this user so user is never locked out
+        if (@->user->id) {
+            GameLog::where('status', 0)
+                ->where('user_id', ->user->id)
+                ->where('game_id', ->game->id)
+                ->update(['status' => 1, 'win_status' => 0]);
         }
-         = GameLog::where('status', 0)->where('user_id', @->user->id)->where('game_id', ->game->id);
-        if (->demoPlay) {
-            ->where('demo_play', Status::YES);
-        } else {
-            ->where(function ($q) {
-                $q->where('demo_play', Status::NO)->orWhereNull('demo_play');
-            });
-        }
-         = ->first();
-        if ($running) {
-            return ['error' => '1 game is in-complete. Please wait'];
-        }
-        if ($this->request->invest > $this->game->max_limit) {
+        if (->request->invest > ->game->max_limit) {
             return ['error' => 'Please follow the maximum limit of invest'];
         }
-        if ($this->request->invest < $this->game->min_limit) {
+        if (->request->invest < ->game->min_limit) {
             return ['error' => 'Please follow the minimum limit of invest'];
         }
         return ['success'];
